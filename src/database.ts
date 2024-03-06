@@ -1,10 +1,14 @@
 import { v4 as uuid4 } from 'uuid';
 import { User } from './user/interfaces/user.interface';
+import { Artist } from './artist/interfaces/artist.interface';
 import { CreateUserDto } from './user/dto/create-user.dto';
 import { UpdateUserDto } from './user/dto/update-user.dto';
+import { CreateArtistDto } from './artist/dto/create-artist.dto';
+import { UpdateArtistDto } from './artist/dto/update-artist.dto';
 
 interface DB {
   users: User[];
+  artists: Artist[];
 }
 
 export class Database {
@@ -15,6 +19,7 @@ export class Database {
   constructor() {
     this.db = {
       users: [],
+      artists: [],
     };
   }
 
@@ -72,6 +77,45 @@ export class Database {
     const user = this.db.users[index];
     this.db.users.splice(index, 1);
     return user;
+  }
+
+  public getArtists(): Artist[] {
+    return this.db.artists;
+  }
+
+  public getArtist(id: string): Artist {
+    return this.db.artists.find((artist) => artist.id === id);
+  }
+
+  public createArtist(createArtistDto: CreateArtistDto): Artist {
+    const artist: Artist = {
+      id: uuid4(),
+      ...createArtistDto,
+    };
+
+    this.db.artists = [...this.db.artists, artist];
+
+    return artist;
+  }
+
+  public updateArtist(id: string, updateArtistDto: UpdateArtistDto): Artist {
+    const artist = this.getArtist(id);
+    const index = this.db.artists.findIndex((artist) => artist.id === id);
+    const updatedArtist: Artist = {
+      ...artist,
+      ...updateArtistDto,
+    };
+
+    this.db.artists[index] = updatedArtist;
+
+    return updatedArtist;
+  }
+
+  public deleteArtist(id: string): Artist {
+    const index = this.db.artists.findIndex((artist) => artist.id === id);
+    const artist = this.db.artists[index];
+    this.db.artists.splice(index, 1);
+    return artist;
   }
 }
 
