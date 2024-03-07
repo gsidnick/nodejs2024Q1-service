@@ -22,9 +22,13 @@ export class ArtistController {
   @Post()
   create(@Body() createArtistDto: CreateArtistDto, @Res() res: Response) {
     if (
-      !(Object.keys(createArtistDto).length === 2) ||
-      createArtistDto.name === null ||
-      createArtistDto.grammy === null
+      !(
+        Object.keys(createArtistDto).length === 2 &&
+        'name' in createArtistDto &&
+        'grammy' in createArtistDto
+      ) ||
+      !isString(createArtistDto.name) ||
+      !isBoolean(createArtistDto.grammy)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
