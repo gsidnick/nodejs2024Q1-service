@@ -1,14 +1,18 @@
 import { v4 as uuid4 } from 'uuid';
 import { User } from './user/interfaces/user.interface';
 import { Artist } from './artist/interfaces/artist.interface';
+import { Track } from './track/interfaces/track.interface';
 import { CreateUserDto } from './user/dto/create-user.dto';
 import { UpdateUserDto } from './user/dto/update-user.dto';
 import { CreateArtistDto } from './artist/dto/create-artist.dto';
 import { UpdateArtistDto } from './artist/dto/update-artist.dto';
+import { CreateTrackDto } from './track/dto/create-track.dto';
+import { UpdateTrackDto } from './track/dto/update-track.dto';
 
 interface DB {
   users: User[];
   artists: Artist[];
+  tracks: Track[];
 }
 
 export class Database {
@@ -20,6 +24,7 @@ export class Database {
     this.db = {
       users: [],
       artists: [],
+      tracks: [],
     };
   }
 
@@ -116,6 +121,45 @@ export class Database {
     const artist = this.db.artists[index];
     this.db.artists.splice(index, 1);
     return artist;
+  }
+
+  public getTracks(): Track[] {
+    return this.db.tracks;
+  }
+
+  public getTrack(id: string): Track {
+    return this.db.tracks.find((track) => track.id === id);
+  }
+
+  public createTrack(createTrackDto: CreateTrackDto): Track {
+    const track: Track = {
+      id: uuid4(),
+      ...createTrackDto,
+    };
+
+    this.db.tracks = [...this.db.tracks, track];
+
+    return track;
+  }
+
+  public updateTrack(id: string, updateTrackDto: UpdateTrackDto): Track {
+    const track = this.getTrack(id);
+    const index = this.db.tracks.findIndex((track) => track.id === id);
+    const updatedTrack: Track = {
+      ...track,
+      ...updateTrackDto,
+    };
+
+    this.db.tracks[index] = updatedTrack;
+
+    return updatedTrack;
+  }
+
+  public deleteTrack(id: string): Track {
+    const index = this.db.tracks.findIndex((track) => track.id === id);
+    const track = this.db.tracks[index];
+    this.db.tracks.splice(index, 1);
+    return track;
   }
 }
 
