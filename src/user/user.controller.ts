@@ -77,7 +77,9 @@ export class UserController {
         Object.keys(updateUserDto).length === 2 &&
         'oldPassword' in updateUserDto &&
         'newPassword' in updateUserDto
-      )
+      ) ||
+      !isString(updateUserDto.oldPassword) ||
+      !isString(updateUserDto.newPassword)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
