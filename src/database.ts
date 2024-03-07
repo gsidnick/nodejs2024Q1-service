@@ -3,6 +3,7 @@ import { User } from './user/interfaces/user.interface';
 import { Artist } from './artist/interfaces/artist.interface';
 import { Track } from './track/interfaces/track.interface';
 import { Album } from './album/interfaces/album.interface';
+import { Favorites } from './favs/interfaces/favs.interface';
 import { CreateUserDto } from './user/dto/create-user.dto';
 import { UpdateUserDto } from './user/dto/update-user.dto';
 import { CreateArtistDto } from './artist/dto/create-artist.dto';
@@ -17,6 +18,7 @@ interface DB {
   artists: Artist[];
   tracks: Track[];
   albums: Album[];
+  favorites: Favorites;
 }
 
 export class Database {
@@ -30,6 +32,7 @@ export class Database {
       artists: [],
       tracks: [],
       albums: [],
+      favorites: { albums: [], artists: [], tracks: [] },
     };
   }
 
@@ -150,6 +153,18 @@ export class Database {
     this.db.albums = albums;
   }
 
+  public deleteArtistFromFavorites(id: string): void {
+    const index = this.db.favorites.artists.findIndex(
+      (artist) => artist.id === id,
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    this.db.favorites.artists.splice(index, 1);
+  }
+
   public getTracks(): Track[] {
     return this.db.tracks;
   }
@@ -187,6 +202,18 @@ export class Database {
     const track = this.db.tracks[index];
     this.db.tracks.splice(index, 1);
     return track;
+  }
+
+  public deleteTrackFromFavorites(id: string): void {
+    const index = this.db.favorites.tracks.findIndex(
+      (track) => track.id === id,
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    this.db.favorites.tracks.splice(index, 1);
   }
 
   public getAlbums(): Album[] {
@@ -236,6 +263,97 @@ export class Database {
     });
 
     this.db.tracks = tracks;
+  }
+
+  public deleteAlbumFromFavorites(id: string): void {
+    const index = this.db.favorites.albums.findIndex(
+      (album) => album.id === id,
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    this.db.favorites.albums.splice(index, 1);
+  }
+
+  public getFavorites(): Favorites {
+    return this.db.favorites;
+  }
+
+  public addTrackToFavs(id: string): Track | undefined {
+    const track = this.getTrack(id);
+
+    if (track) {
+      this.db.favorites.tracks = [...this.db.favorites.tracks, track];
+    }
+
+    return track;
+  }
+
+  public removeTrackFromFavs(id: string): Track | undefined {
+    const index = this.db.favorites.tracks.findIndex(
+      (track) => track.id === id,
+    );
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    const track = this.db.favorites.tracks[index];
+    this.db.favorites.tracks.splice(index, 1);
+
+    return track;
+  }
+
+  public addAlbumToFavs(id: string): Album | undefined {
+    const album = this.getAlbum(id);
+
+    if (album) {
+      this.db.favorites.albums = [...this.db.favorites.albums, album];
+    }
+
+    return album;
+  }
+
+  public removeAlbumFromFavs(id: string): Album | undefined {
+    const index = this.db.favorites.albums.findIndex(
+      (album) => album.id === id,
+    );
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    const album = this.db.favorites.albums[index];
+    this.db.favorites.albums.splice(index, 1);
+
+    return album;
+  }
+
+  public addArtistToFavs(id: string): Artist | undefined {
+    const artist = this.getArtist(id);
+
+    if (artist) {
+      this.db.favorites.artists = [...this.db.favorites.artists, artist];
+    }
+
+    return artist;
+  }
+
+  public removeArtistFromFavs(id: string): Artist | undefined {
+    const index = this.db.favorites.artists.findIndex(
+      (artist) => artist.id === id,
+    );
+
+    if (index === -1) {
+      return undefined;
+    }
+
+    const artist = this.db.favorites.artists[index];
+    this.db.favorites.artists.splice(index, 1);
+
+    return artist;
   }
 }
 

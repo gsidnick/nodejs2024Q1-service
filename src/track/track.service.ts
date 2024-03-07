@@ -22,6 +22,7 @@ export class TrackService {
   }
 
   remove(id: string) {
+    database.deleteTrackFromFavorites(id);
     database.deleteTrack(id);
   }
 }

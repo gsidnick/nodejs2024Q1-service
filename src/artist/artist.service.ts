@@ -23,6 +23,7 @@ export class ArtistService {
   }
 
   remove(id: string) {
+    database.deleteArtistFromFavorites(id);
     database.deleteArtistIdInTracks(id);
     database.deleteArtistIdInAlbums(id);
     database.deleteArtist(id);
