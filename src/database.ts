@@ -128,6 +128,28 @@ export class Database {
     return artist;
   }
 
+  public deleteArtistIdInTracks(id: string): void {
+    const tracks = this.db.tracks.map((track) => {
+      if (track.artistId === id) {
+        track.artistId = null;
+      }
+      return track;
+    });
+
+    this.db.tracks = tracks;
+  }
+
+  public deleteArtistIdInAlbums(id: string): void {
+    const albums = this.db.albums.map((album) => {
+      if (album.artistId === id) {
+        album.artistId = null;
+      }
+      return album;
+    });
+
+    this.db.albums = albums;
+  }
+
   public getTracks(): Track[] {
     return this.db.tracks;
   }
