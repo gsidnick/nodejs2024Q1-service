@@ -41,7 +41,13 @@ export class UserController {
   @Get()
   findAll(@Res() res: Response) {
     const users = this.userService.findAll();
-    res.status(HttpStatus.OK).json(users).send();
+
+    const usersForResponse = [...users].map((user) => {
+      delete user.password;
+      return user;
+    });
+
+    res.status(HttpStatus.OK).json(usersForResponse).send();
   }
 
   @Get(':id')
@@ -58,7 +64,10 @@ export class UserController {
       return;
     }
 
-    res.status(HttpStatus.OK).json(user).send();
+    const userForResponse = { ...user };
+    delete userForResponse.password;
+
+    res.status(HttpStatus.OK).json(userForResponse).send();
   }
 
   @Put(':id')
@@ -98,6 +107,10 @@ export class UserController {
     }
 
     const updated = this.userService.update(id, updateUserDto);
+
+    const userForResponse = { ...updated };
+    delete userForResponse.password;
+
     res.status(HttpStatus.OK).json(updated).send();
   }
 

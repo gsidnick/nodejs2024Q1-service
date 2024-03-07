@@ -69,7 +69,7 @@ export class Database {
   }
 
   public updateUser(id: string, updateUserDto: UpdateUserDto): User {
-    const user = this.getUser(id);
+    const user = this.db.users.find((user) => user.id === id);
     const index = this.db.users.findIndex((user) => user.id === id);
     const updatedUser: User = {
       ...user,
