@@ -4,6 +4,7 @@ import { readFile } from 'fs/promises';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { PORT } from './constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,6 @@ async function bootstrap() {
   const document = parse(config);
   SwaggerModule.setup('doc', app, document);
 
-  await app.listen(4000);
+  await app.listen(PORT);
 }
 bootstrap();
