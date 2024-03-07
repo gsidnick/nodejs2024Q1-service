@@ -204,6 +204,17 @@ export class Database {
     this.db.albums.splice(index, 1);
     return album;
   }
+
+  public deleteAlbumIdInTracks(id: string): void {
+    const tracks = this.db.tracks.map((track) => {
+      if (track.albumId === id) {
+        track.albumId = null;
+      }
+      return track;
+    });
+
+    this.db.tracks = tracks;
+  }
 }
 
 export default Database.getInstance();

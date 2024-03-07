@@ -22,6 +22,7 @@ export class AlbumService {
   }
 
   remove(id: string) {
+    database.deleteAlbumIdInTracks(id);
     database.deleteAlbum(id);
   }
 }
