@@ -2,17 +2,21 @@ import { v4 as uuid4 } from 'uuid';
 import { User } from './user/interfaces/user.interface';
 import { Artist } from './artist/interfaces/artist.interface';
 import { Track } from './track/interfaces/track.interface';
+import { Album } from './album/interfaces/album.interface';
 import { CreateUserDto } from './user/dto/create-user.dto';
 import { UpdateUserDto } from './user/dto/update-user.dto';
 import { CreateArtistDto } from './artist/dto/create-artist.dto';
 import { UpdateArtistDto } from './artist/dto/update-artist.dto';
 import { CreateTrackDto } from './track/dto/create-track.dto';
 import { UpdateTrackDto } from './track/dto/update-track.dto';
+import { CreateAlbumDto } from './album/dto/create-album.dto';
+import { UpdateAlbumDto } from './album/dto/update-album.dto';
 
 interface DB {
   users: User[];
   artists: Artist[];
   tracks: Track[];
+  albums: Album[];
 }
 
 export class Database {
@@ -25,6 +29,7 @@ export class Database {
       users: [],
       artists: [],
       tracks: [],
+      albums: [],
     };
   }
 
@@ -160,6 +165,44 @@ export class Database {
     const track = this.db.tracks[index];
     this.db.tracks.splice(index, 1);
     return track;
+  }
+
+  public getAlbums(): Album[] {
+    return this.db.albums;
+  }
+
+  public getAlbum(id: string): Album {
+    return this.db.albums.find((album) => album.id === id);
+  }
+
+  public createAlbum(createAlbumDto: CreateAlbumDto): Album {
+    const album: Album = {
+      id: uuid4(),
+      ...createAlbumDto,
+    };
+
+    this.db.albums = [...this.db.albums, album];
+
+    return album;
+  }
+  public updateAlbum(id: string, updateAlbumDto: UpdateAlbumDto): Album {
+    const album = this.getAlbum(id);
+    const index = this.db.albums.findIndex((album) => album.id === id);
+    const updatedAlbum: Album = {
+      ...album,
+      ...updateAlbumDto,
+    };
+
+    this.db.albums[index] = updatedAlbum;
+
+    return updatedAlbum;
+  }
+
+  public deleteAlbum(id: string): Album {
+    const index = this.db.albums.findIndex((album) => album.id === id);
+    const album = this.db.albums[index];
+    this.db.albums.splice(index, 1);
+    return album;
   }
 }
 
