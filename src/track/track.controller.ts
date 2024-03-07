@@ -22,8 +22,19 @@ export class TrackController {
   @Post()
   create(@Body() createTrackDto: CreateTrackDto, @Res() res: Response) {
     if (
-      !(Object.keys(createTrackDto).length === 4) ||
-      createTrackDto.name === null
+      !(
+        Object.keys(createTrackDto).length === 4 &&
+        'name' in createTrackDto &&
+        'artistId' in createTrackDto &&
+        'albumId' in createTrackDto &&
+        'duration' in createTrackDto
+      ) ||
+      !isString(createTrackDto.name) ||
+      !(
+        isString(createTrackDto.artistId) || createTrackDto.artistId === null
+      ) ||
+      !(isString(createTrackDto.albumId) || createTrackDto.albumId === null) ||
+      !isNumber(createTrackDto.duration)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
@@ -76,6 +87,10 @@ export class TrackController {
         'duration' in updateTrackDto
       ) ||
       !isString(updateTrackDto.name) ||
+      !(
+        isString(updateTrackDto.artistId) || updateTrackDto.artistId === null
+      ) ||
+      !(isString(updateTrackDto.albumId) || updateTrackDto.albumId === null) ||
       !isNumber(updateTrackDto.duration)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
