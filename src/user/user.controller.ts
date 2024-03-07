@@ -53,12 +53,12 @@ export class UserController {
 
     const user = this.userService.findOne(id);
 
-    if (user) {
-      res.status(HttpStatus.OK).json(user).send();
+    if (!user) {
+      res.status(HttpStatus.NOT_FOUND).send();
       return;
     }
 
-    res.status(HttpStatus.NOT_FOUND).send();
+    res.status(HttpStatus.OK).json(user).send();
   }
 
   @Put(':id')
