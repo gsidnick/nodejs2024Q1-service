@@ -8,8 +8,12 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/gsidnick/nodejs2024Q1-service.git
 ```
+
+## Environment
+
+Copy `.env.example` file and then rename it to `.env` before running the application
 
 ## Installing NPM modules
 
@@ -17,15 +21,29 @@ git clone {repository URL}
 npm install
 ```
 
-## Running application
+## Running Application
+
+### Production Mode
 
 ```
-npm start
+npm run start
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+### Development Mode
+
+```
+npm run start:dev
+```
+
+### Build Application
+
+```
+npm run start:prod
+```
+
+> After starting the app on port (4000 as default) you can open
+> in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+> For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
 
@@ -37,10 +55,34 @@ To run all tests without authorization
 npm run test
 ```
 
-To run only one of all test suites
+To run only users test suites
 
 ```
-npm run test -- <path to suite>
+npm run test test/users.e2e.spec.ts
+```
+
+To run only albums test suites
+
+```
+npm run test test/albums.e2e.spec.ts
+```
+
+To run only artists test suites
+
+```
+npm run test test/artists.e2e.spec.ts
+```
+
+To run only tracks test suites
+
+```
+npm run test test/tracks.e2e.spec.ts
+```
+
+To run only favorites test suites
+
+```
+npm run test test/favorites.e2e.spec.ts
 ```
 
 To run all test with authorization
@@ -55,7 +97,7 @@ To run only specific test suite with authorization
 npm run test:auth -- <path to suite>
 ```
 
-### Auto-fix and format
+## Auto-fix and format
 
 ```
 npm run lint
@@ -65,7 +107,7 @@ npm run lint
 npm run format
 ```
 
-### Debugging in VSCode
+## Debugging in VSCode
 
 Press <kbd>F5</kbd> to debug.
 
