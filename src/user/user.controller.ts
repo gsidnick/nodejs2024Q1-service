@@ -10,7 +10,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { isUUID } from 'class-validator';
+import { isString, isUUID } from 'class-validator';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -22,9 +22,13 @@ export class UserController {
   @Post()
   create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     if (
-      !(Object.keys(createUserDto).length === 2) ||
-      createUserDto.login === null ||
-      createUserDto.password === null
+      !(
+        Object.keys(createUserDto).length === 2 &&
+        'login' in createUserDto &&
+        'password' in createUserDto
+      ) ||
+      !isString(createUserDto.login) ||
+      !isString(createUserDto.password)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
