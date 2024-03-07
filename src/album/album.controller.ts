@@ -10,7 +10,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { isString, isUUID } from 'class-validator';
+import { isNumber, isString, isUUID } from 'class-validator';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
@@ -22,8 +22,15 @@ export class AlbumController {
   @Post()
   create(@Body() createAlbumDto: CreateAlbumDto, @Res() res: Response) {
     if (
-      !(Object.keys(createAlbumDto).length === 3) ||
-      createAlbumDto.name === null
+      !(
+        Object.keys(createAlbumDto).length === 3 &&
+        'name' in createAlbumDto &&
+        'year' in createAlbumDto &&
+        'artistId' in createAlbumDto
+      ) ||
+      !isString(createAlbumDto.name) ||
+      !isNumber(createAlbumDto.year) ||
+      !(isString(createAlbumDto.artistId) || createAlbumDto.artistId === null)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
@@ -68,8 +75,15 @@ export class AlbumController {
     }
 
     if (
-      !(Object.keys(updateAlbumDto).length === 3 && 'name' in updateAlbumDto) ||
-      !isString(updateAlbumDto.name)
+      !(
+        Object.keys(updateAlbumDto).length === 3 &&
+        'name' in updateAlbumDto &&
+        'year' in updateAlbumDto &&
+        'artistId' in updateAlbumDto
+      ) ||
+      !isString(updateAlbumDto.name) ||
+      !isNumber(updateAlbumDto.year) ||
+      !(isString(updateAlbumDto.artistId) || updateAlbumDto.artistId === null)
     ) {
       res.status(HttpStatus.BAD_REQUEST).send();
       return;
