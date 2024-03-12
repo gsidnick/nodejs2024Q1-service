@@ -13,6 +13,12 @@ export interface CreateUserDto {
 }
 
 export interface UpdateUserDto {
+  password: string;
+  version: number;
+  updatedAt: string;
+}
+
+export interface UpdatePasswordDto {
   oldPassword: string;
   newPassword: string;
 }
