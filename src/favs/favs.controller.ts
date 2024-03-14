@@ -16,39 +16,60 @@ export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
   @Get()
-  findAll(@Res() res: Response) {
-    const favorites = this.favsService.findAll();
+  async findAll(@Res() res: Response) {
+    const favorites = await this.favsService.findAll();
+
     res.status(HttpStatus.OK).json(favorites).send();
   }
 
   @Post('track/:id')
-  addTrack(@Param('id') id: string, @Res() res: Response) {
+  async addTrack(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.favsService.addTrack(id);
+    const track = await this.favsService.addTrack(id);
 
     if (!track) {
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+      const error = {
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        message: 'Unprocessable entity',
+      };
+
+      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
       return;
     }
 
-    res.status(HttpStatus.CREATED).send();
+    res.status(HttpStatus.CREATED).json(track).send();
   }
 
   @Delete('track/:id')
-  removeTrack(@Param('id') id: string, @Res() res: Response) {
+  async removeTrack(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.favsService.removeTrack(id);
+    const track = await this.favsService.removeTrack(id);
 
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
@@ -56,33 +77,53 @@ export class FavsController {
   }
 
   @Post('album/:id')
-  addAlbum(@Param('id') id: string, @Res() res: Response) {
+  async addAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.favsService.addAlbum(id);
+    const album = await this.favsService.addAlbum(id);
 
     if (!album) {
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+      const error = {
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        message: 'Unprocessable entity',
+      };
+
+      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
       return;
     }
 
-    res.status(HttpStatus.CREATED).send();
+    res.status(HttpStatus.CREATED).json(album).send();
   }
 
   @Delete('album/:id')
-  removeAlbum(@Param('id') id: string, @Res() res: Response) {
+  async removeAlbum(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.favsService.removeAlbum(id);
+    const album = await this.favsService.removeAlbum(id);
 
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
@@ -90,33 +131,53 @@ export class FavsController {
   }
 
   @Post('artist/:id')
-  addArtist(@Param('id') id: string, @Res() res: Response) {
+  async addArtist(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const artist = this.favsService.addArtist(id);
+    const artist = await this.favsService.addArtist(id);
 
     if (!artist) {
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).send();
+      const error = {
+        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        message: 'Unprocessable entity',
+      };
+
+      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
       return;
     }
 
-    res.status(HttpStatus.CREATED).send();
+    res.status(HttpStatus.CREATED).json(artist).send();
   }
 
   @Delete('artist/:id')
-  removeArtist(@Param('id') id: string, @Res() res: Response) {
+  async removeArtist(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const artist = this.favsService.removeArtist(id);
+    const artist = await this.favsService.removeArtist(id);
 
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
