@@ -1,15 +1,43 @@
-version: '4.28'
+version: '3.8'
 services:
-  postgres:
-    image: postgres
+  api:
+    container_name: api
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    env_file:
+      - .env
     restart: always
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - api:/usr/src/app
     ports:
-      - '5432:5432'
+      - ${PORT}:${PORT}
+    networks:
+      - api-network
+    depends_on:
+      - postgres
+    command: npm run start:migrate:prod
+
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:${POSTGRES_DATA}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    networks:
+      - api-network
 
 volumes:
+  api:
   postgres:
+
+networks:
+  api-network:
