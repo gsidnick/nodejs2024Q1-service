@@ -1,3 +1,5 @@
 FROM postgres:16.2-alpine3.19
+RUN	mkdir /logs
+RUN	chown postgres:postgres /logs
 
 EXPOSE ${POSTGRES_PORT}
