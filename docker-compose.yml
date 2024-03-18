@@ -5,39 +5,43 @@ services:
     build: 
       dockerfile: Dockerfile
       context: .
+    restart: unless-stopped
     env_file:
       - .env
-    restart: always
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public
     volumes:
-      - api:/usr/src/app
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - ${PORT}:${PORT}
     networks:
-      - api-network
+      - backend
     depends_on:
-      - postgres
-    command: npm run start:migrate:prod
+      - database
 
-  postgres:
-    image: postgres:alpine
-    container_name: postgres
-    restart: always
+  database:
+    container_name: database
+    build: 
+      dockerfile: Dockerfile.database
+      context: .
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres:${POSTGRES_DATA}
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - database:/var/lib/postgresql/data
+      - log:/var/lib/postgresql/log
     networks:
-      - api-network
+      - backend
 
 volumes:
-  api:
-  postgres:
+  database:
+  log:
 
 networks:
-  api-network:
+  backend:
+    driver: bridge
