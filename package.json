@@ -23,7 +23,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "npx prisma migrate deploy",
-    "docker:up": "docker compose up"
+    "docker:up": "docker compose up",
+    "docker:stop": "docker compose stop",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down --volumes",
+    "docker:scan": "docker scout quickview nodejs2024q1-service-api"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",
