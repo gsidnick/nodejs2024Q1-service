@@ -2,7 +2,7 @@
 CREATE TABLE "User" (
     "id" UUID NOT NULL,
     "login" VARCHAR(50) NOT NULL,
-    "password" VARCHAR(50) NOT NULL,
+    "password" VARCHAR(100) NOT NULL,
     "version" INTEGER NOT NULL DEFAULT 1,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,6 +49,9 @@ CREATE TABLE "Favorite" (
 
     CONSTRAINT "Favorite_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Favorite_albumId_key" ON "Favorite"("albumId");
