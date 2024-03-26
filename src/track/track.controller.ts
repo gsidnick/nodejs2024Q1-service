@@ -7,166 +7,55 @@ import {
   Param,
   Delete,
   HttpStatus,
-  Res,
+  HttpCode,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { isNumber, isString, isUUID } from 'class-validator';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entities/track.entity';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  async create(@Body() createTrackDto: CreateTrackDto, @Res() res: Response) {
-    if (
-      !(
-        Object.keys(createTrackDto).length === 4 &&
-        'name' in createTrackDto &&
-        'artistId' in createTrackDto &&
-        'albumId' in createTrackDto &&
-        'duration' in createTrackDto
-      ) ||
-      !isString(createTrackDto.name) ||
-      !(
-        isString(createTrackDto.artistId) || createTrackDto.artistId === null
-      ) ||
-      !(isString(createTrackDto.albumId) || createTrackDto.albumId === null) ||
-      !isNumber(createTrackDto.duration)
-    ) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.trackService.create(createTrackDto);
-
-    res.status(HttpStatus.CREATED).json(track).send();
+  async create(@Body() createTrackDto: CreateTrackDto): Promise<Track> {
+    return await this.trackService.create(createTrackDto);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async findAll(@Res() res: Response) {
-    const tracks = await this.trackService.findAll();
-
-    res.status(HttpStatus.OK).json(tracks).send();
+  async findAll(): Promise<Track[]> {
+    return await this.trackService.findAll();
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.trackService.findOne(id);
-
-    if (!track) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.OK).json(track).send();
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Track> {
+    return await this.trackService.findOne(id);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
-    @Res() res: Response,
-  ) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    if (
-      !(
-        Object.keys(updateTrackDto).length === 4 &&
-        'name' in updateTrackDto &&
-        'artistId' in updateTrackDto &&
-        'albumId' in updateTrackDto &&
-        'duration' in updateTrackDto
-      ) ||
-      !isString(updateTrackDto.name) ||
-      !(
-        isString(updateTrackDto.artistId) || updateTrackDto.artistId === null
-      ) ||
-      !(isString(updateTrackDto.albumId) || updateTrackDto.albumId === null) ||
-      !isNumber(updateTrackDto.duration)
-    ) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.trackService.findOne(id);
-
-    if (!track) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    const updatedTrack = await this.trackService.update(id, updateTrackDto);
-
-    res.status(HttpStatus.OK).json(updatedTrack).send();
+  ): Promise<Track> {
+    return await this.trackService.update(id, updateTrackDto);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.trackService.findOne(id);
-
-    if (!track) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
     await this.trackService.remove(id);
-
-    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

@@ -1,6 +1,7 @@
 import { parse } from 'yaml';
 import { join } from 'path';
 import { readFile } from 'fs/promises';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -12,7 +13,8 @@ async function bootstrap() {
   const config = await readFile(filename, 'utf-8');
   const document = parse(config);
   SwaggerModule.setup('doc', app, document);
-
+  app.useGlobalPipes(new ValidationPipe());
   await app.listen(PORT);
 }
+
 bootstrap();
