@@ -12,6 +12,7 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { AuthUserDto } from 'src/user/dto/auth-user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { Tokens } from './entities/tokens.entity';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,5 +29,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() authUserDto: AuthUserDto): Promise<Tokens> {
     return await this.authService.login(authUserDto);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<Tokens> {
+    return await this.authService.refresh(refreshTokenDto);
   }
 }

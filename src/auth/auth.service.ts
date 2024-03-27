@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/user/user.service';
@@ -12,6 +16,8 @@ import {
   SECRET_REFRESH_KEY,
 } from 'src/constants';
 import { Tokens } from './entities/tokens.entity';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { PayloadDto } from './dto/payload.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,15 +42,42 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const payload = { userId: user.id, login: user.login };
-    const accessToken = await this.jwtService.signAsync(payload, {
+    const tokens = this.createTokens({ userId: user.id, login: user.login });
+
+    return new Tokens(tokens);
+  }
+
+  async refresh(refreshTokenDto: RefreshTokenDto): Promise<Tokens> {
+    if (!refreshTokenDto.refreshToken) {
+      throw new UnauthorizedException();
+    }
+
+    try {
+      const { userId, login } = this.jwtService.verify(
+        refreshTokenDto.refreshToken,
+        {
+          secret: SECRET_REFRESH_KEY,
+        },
+      );
+
+      const tokens = this.createTokens({ userId, login });
+
+      return new Tokens(tokens);
+    } catch {
+      throw new ForbiddenException();
+    }
+  }
+
+  createTokens(payload: PayloadDto): Tokens {
+    const accessToken = this.jwtService.sign(payload, {
       secret: SECRET_KEY,
       expiresIn: EXPIRE_TIME,
     });
-    const refreshToken = await this.jwtService.signAsync(payload, {
+    const refreshToken = this.jwtService.sign(payload, {
       secret: SECRET_REFRESH_KEY,
       expiresIn: REFRESH_EXPIRE_TIME,
     });
-    return new Tokens({ accessToken, refreshToken });
+
+    return { accessToken, refreshToken };
   }
 }
