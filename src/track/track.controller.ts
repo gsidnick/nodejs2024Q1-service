@@ -20,7 +20,7 @@ export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Post()
-  create(@Body() createTrackDto: CreateTrackDto, @Res() res: Response) {
+  async create(@Body() createTrackDto: CreateTrackDto, @Res() res: Response) {
     if (
       !(
         Object.keys(createTrackDto).length === 4 &&
@@ -36,31 +36,48 @@ export class TrackController {
       !(isString(createTrackDto.albumId) || createTrackDto.albumId === null) ||
       !isNumber(createTrackDto.duration)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.trackService.create(createTrackDto);
+    const track = await this.trackService.create(createTrackDto);
+
     res.status(HttpStatus.CREATED).json(track).send();
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const tracks = this.trackService.findAll();
+  async findAll(@Res() res: Response) {
+    const tracks = await this.trackService.findAll();
+
     res.status(HttpStatus.OK).json(tracks).send();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
+  async findOne(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.trackService.findOne(id);
+    const track = await this.trackService.findOne(id);
 
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
@@ -68,13 +85,18 @@ export class TrackController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateTrackDto: UpdateTrackDto,
     @Res() res: Response,
   ) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
@@ -93,36 +115,58 @@ export class TrackController {
       !(isString(updateTrackDto.albumId) || updateTrackDto.albumId === null) ||
       !isNumber(updateTrackDto.duration)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.trackService.findOne(id);
+    const track = await this.trackService.findOne(id);
 
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    const updatedTrack = this.trackService.update(id, updateTrackDto);
+    const updatedTrack = await this.trackService.update(id, updateTrackDto);
+
     res.status(HttpStatus.OK).json(updatedTrack).send();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const track = this.trackService.findOne(id);
+    const track = await this.trackService.findOne(id);
 
     if (!track) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    this.trackService.remove(id);
+    await this.trackService.remove(id);
+
     res.status(HttpStatus.NO_CONTENT).send();
   }
 }

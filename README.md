@@ -7,13 +7,17 @@
 
 ## Downloading
 
+### Clone repository
+
 ```
 git clone https://github.com/gsidnick/nodejs2024Q1-service.git
 ```
 
-## Environment
+### Checkout to branch
 
-Copy `.env.example` file and then rename it to `.env` before running the application
+```
+git checkout feat/part-2
+```
 
 ## Installing NPM modules
 
@@ -21,7 +25,43 @@ Copy `.env.example` file and then rename it to `.env` before running the applica
 npm install
 ```
 
-## Running Application
+## Environment
+
+Copy `.env.example` file and then rename it to `.env` before running the application
+
+## Running Application (Docker)
+
+### Run Services
+
+```
+npm run docker:up
+```
+
+### Stop Services
+
+```
+npm run docker:stop
+```
+
+### Delete Services
+
+```
+npm run docker:down
+```
+
+### Delete Services & Volumes
+
+```
+npm run docker:down:volumes
+```
+
+### Scan Docker Image
+
+```
+npm run docker:scan
+```
+
+## Running Application (Local)
 
 ### Production Mode
 

@@ -20,7 +20,7 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() createAlbumDto: CreateAlbumDto, @Res() res: Response) {
+  async create(@Body() createAlbumDto: CreateAlbumDto, @Res() res: Response) {
     if (
       !(
         Object.keys(createAlbumDto).length === 3 &&
@@ -32,31 +32,47 @@ export class AlbumController {
       !isNumber(createAlbumDto.year) ||
       !(isString(createAlbumDto.artistId) || createAlbumDto.artistId === null)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.albumService.create(createAlbumDto);
+    const album = await this.albumService.create(createAlbumDto);
     res.status(HttpStatus.CREATED).json(album).send();
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const albums = this.albumService.findAll();
+  async findAll(@Res() res: Response) {
+    const albums = await this.albumService.findAll();
+
     res.status(HttpStatus.OK).json(albums).send();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
+  async findOne(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.albumService.findOne(id);
+    const album = await this.albumService.findOne(id);
 
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
@@ -64,13 +80,18 @@ export class AlbumController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
     @Res() res: Response,
   ) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
@@ -85,36 +106,57 @@ export class AlbumController {
       !isNumber(updateAlbumDto.year) ||
       !(isString(updateAlbumDto.artistId) || updateAlbumDto.artistId === null)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.albumService.findOne(id);
+    const album = await this.albumService.findOne(id);
 
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    const updatedAlbum = this.albumService.update(id, updateAlbumDto);
+    const updatedAlbum = await this.albumService.update(id, updateAlbumDto);
     res.status(HttpStatus.OK).json(updatedAlbum).send();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const album = this.albumService.findOne(id);
+    const album = await this.albumService.findOne(id);
 
     if (!album) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    this.albumService.remove(id);
+    await this.albumService.remove(id);
+
     res.status(HttpStatus.NO_CONTENT).send();
   }
 }
