@@ -7,14 +7,11 @@ export interface User {
   updatedAt: number;
 }
 
-export interface CreateUserDto {
-  login: string;
-  password: string;
-}
+export type CreateUserDto = Pick<User, 'login' | 'password'>;
 
-export interface UpdateUserDto {
-  password: string;
-  version: number;
+export type AuthUserDto = Pick<User, 'login' | 'password'>;
+
+export interface UpdateUserDto extends Pick<User, 'password' | 'version'> {
   updatedAt: string;
 }
 
