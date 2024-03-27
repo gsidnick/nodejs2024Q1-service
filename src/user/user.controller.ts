@@ -11,28 +11,33 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entities/user.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return await this.userService.create(createUserDto);
   }
 
+  @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   async findAll(): Promise<User[]> {
     return await this.userService.findAll();
   }
 
+  @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   async findOne(
@@ -41,6 +46,7 @@ export class UserController {
     return await this.userService.findOneById(id);
   }
 
+  @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
   async update(
@@ -50,6 +56,7 @@ export class UserController {
     return await this.userService.update(id, updatePasswordDto);
   }
 
+  @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
