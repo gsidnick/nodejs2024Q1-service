@@ -6,6 +6,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { PORT } from './constants';
+import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,10 @@ async function bootstrap() {
   const document = parse(config);
   SwaggerModule.setup('doc', app, document);
   app.useGlobalPipes(new ValidationPipe());
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
   await app.listen(PORT);
 }
 
