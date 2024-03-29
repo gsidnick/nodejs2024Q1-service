@@ -12,6 +12,7 @@ services:
       - .env
     volumes:
       - .:/usr/src/app
+      - api-logs:/usr/src/app/logs
       - /usr/src/app/node_modules
     ports:
       - ${PORT}:${PORT}
@@ -46,6 +47,7 @@ services:
 volumes:
   data:
   logs:
+  api-logs:
 
 networks:
   backend:
