@@ -20,27 +20,27 @@ export class LoggerService implements ILoggerService {
     this.makeLogDir(this.dir);
   }
 
-  log(data: any) {
-    this.write('log', data);
+  log(data: any, ...rest: any[]) {
+    this.write('log', data, rest);
   }
 
-  error(data: any) {
-    this.write('error', data);
+  error(data: any, ...rest: any[]) {
+    this.write('error', data, rest);
   }
 
-  warn(data: any) {
-    this.write('warn', data);
+  warn(data: any, ...rest: any[]) {
+    this.write('warn', data, rest);
   }
 
-  debug?(data: any) {
-    this.write('debug', data);
+  debug?(data: any, ...rest: any[]) {
+    this.write('debug', data, rest);
   }
 
-  verbose?(data: any) {
-    this.write('verbose', data);
+  verbose?(data: any, ...rest: any[]) {
+    this.write('verbose', data, rest);
   }
 
-  private async write(type: LogLevel, data) {
+  private async write(type: LogLevel, data, rest) {
     const [level, color] = this.useLevelColor(type);
 
     if (level > this.level) {
@@ -49,7 +49,8 @@ export class LoggerService implements ILoggerService {
 
     const pid = process.pid;
     const datetime = new Date(Date.now()).toLocaleString();
-    const message = `[Nest] ${pid}  - ${datetime}     ${data}`;
+    const parameters = this.getParameters(rest);
+    const message = `[Nest] ${pid}  - ${datetime}     ${data}${parameters}`;
 
     this.printToConsole(color, message);
 
@@ -116,5 +117,21 @@ export class LoggerService implements ILoggerService {
       default:
         return [0, '\x1b[37m'];
     }
+  }
+
+  private getParameters(params: any[] | undefined): string {
+    if (params) {
+      return params
+        .map((data) => {
+          if (data instanceof Error) {
+            return JSON.stringify({ message: data.message, stack: data.stack });
+          }
+
+          return JSON.stringify(data);
+        })
+        .join('; ');
+    }
+
+    return '';
   }
 }

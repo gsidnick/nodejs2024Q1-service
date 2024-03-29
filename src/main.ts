@@ -19,6 +19,14 @@ async function bootstrap() {
   const logger = app.get(LoggerService);
   app.useLogger(logger);
 
+  process.on('uncaughtException', (e) => {
+    logger.error('[Uncaught Exception] ', e);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('[Unhandled Rejection] ', promise, 'reason:', reason);
+  });
+
   await app.listen(PORT);
 }
 
