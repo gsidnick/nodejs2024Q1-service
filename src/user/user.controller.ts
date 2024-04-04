@@ -14,13 +14,15 @@ import { isString, isUUID } from 'class-validator';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { User } from './interfaces/user.interface';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+  async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     if (
       !(
         Object.keys(createUserDto).length === 2 &&
@@ -30,105 +32,180 @@ export class UserController {
       !isString(createUserDto.login) ||
       !isString(createUserDto.password)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const user = this.userService.create(createUserDto);
-    res.status(HttpStatus.CREATED).json(user).send();
+    const createdUser = await this.userService.create(createUserDto);
+    const userForResponse: Omit<User, 'password'> = {
+      id: createdUser.id,
+      login: createdUser.login,
+      version: createdUser.version,
+      createdAt: createdUser.createdAt.getTime(),
+      updatedAt: createdUser.updatedAt.getTime(),
+    };
+
+    res.status(HttpStatus.CREATED).json(userForResponse).send();
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const users = this.userService.findAll();
-
-    const usersForResponse = [...users].map((user) => {
-      delete user.password;
-      return user;
-    });
+  async findAll(@Res() res: Response) {
+    const users = await this.userService.findAll();
+    const usersForResponse: Omit<User, 'password'>[] = [...users].map(
+      (user) => {
+        return {
+          id: user.id,
+          login: user.login,
+          version: user.version,
+          createdAt: user.createdAt.getTime(),
+          updatedAt: user.updatedAt.getTime(),
+        };
+      },
+    );
 
     res.status(HttpStatus.OK).json(usersForResponse).send();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
+  async findOne(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    const userForResponse = { ...user };
-    delete userForResponse.password;
+    const userForResponse: Omit<User, 'password'> = {
+      id: user.id,
+      login: user.login,
+      version: user.version,
+      createdAt: user.createdAt.getTime(),
+      updatedAt: user.updatedAt.getTime(),
+    };
 
     res.status(HttpStatus.OK).json(userForResponse).send();
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updatePasswordDto: UpdatePasswordDto,
     @Res() res: Response,
   ) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
     if (
       !(
-        Object.keys(updateUserDto).length === 2 &&
-        'oldPassword' in updateUserDto &&
-        'newPassword' in updateUserDto
+        Object.keys(updatePasswordDto).length === 2 &&
+        'oldPassword' in updatePasswordDto &&
+        'newPassword' in updatePasswordDto
       ) ||
-      !isString(updateUserDto.oldPassword) ||
-      !isString(updateUserDto.newPassword)
+      !isString(updatePasswordDto.oldPassword) ||
+      !isString(updatePasswordDto.newPassword)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    if (user.password !== updateUserDto.oldPassword) {
-      res.status(HttpStatus.FORBIDDEN).send();
+    if (user.password !== updatePasswordDto.oldPassword) {
+      const error = {
+        statusCode: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
+      };
+
+      res.status(HttpStatus.FORBIDDEN).json(error).send();
       return;
     }
 
-    const updated = this.userService.update(id, updateUserDto);
+    const updateUserDto: UpdateUserDto = {
+      password: updatePasswordDto.newPassword,
+      version: user.version + 1,
+      updatedAt: new Date(Date.now()).toISOString(),
+    };
 
-    const userForResponse = { ...updated };
-    delete userForResponse.password;
+    const updatedUser = await this.userService.update(id, updateUserDto);
+    const userForResponse: Omit<User, 'password'> = {
+      id: updatedUser.id,
+      login: updatedUser.login,
+      version: updatedUser.version,
+      createdAt: updatedUser.createdAt.getTime(),
+      updatedAt: updatedUser.updatedAt.getTime(),
+    };
 
-    res.status(HttpStatus.OK).json(updated).send();
+    res.status(HttpStatus.OK).json(userForResponse).send();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const user = this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     if (!user) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    this.userService.remove(id);
+    await this.userService.remove(id);
+
     res.status(HttpStatus.NO_CONTENT).send();
   }
 }

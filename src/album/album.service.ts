@@ -1,29 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import database from '../database';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AlbumService {
-  create(createAlbumDto: CreateAlbumDto) {
-    return database.createAlbum(createAlbumDto);
+  constructor(private prisma: PrismaService) {}
+
+  async create(createAlbumDto: CreateAlbumDto) {
+    return this.prisma.album.create({ data: createAlbumDto });
   }
 
-  findAll() {
-    return database.getAlbums();
+  async findAll() {
+    return this.prisma.album.findMany();
   }
 
-  findOne(id: string) {
-    return database.getAlbum(id);
+  async findOne(id: string) {
+    return this.prisma.album.findUnique({ where: { id } });
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    return database.updateAlbum(id, updateAlbumDto);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    return this.prisma.album.update({ where: { id }, data: updateAlbumDto });
   }
 
-  remove(id: string) {
-    database.deleteAlbumFromFavorites(id);
-    database.deleteAlbumIdInTracks(id);
-    database.deleteAlbum(id);
+  async remove(id: string) {
+    return this.prisma.album.delete({ where: { id } });
   }
 }

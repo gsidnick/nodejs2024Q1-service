@@ -20,7 +20,7 @@ export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Post()
-  create(@Body() createArtistDto: CreateArtistDto, @Res() res: Response) {
+  async create(@Body() createArtistDto: CreateArtistDto, @Res() res: Response) {
     if (
       !(
         Object.keys(createArtistDto).length === 2 &&
@@ -30,31 +30,48 @@ export class ArtistController {
       !isString(createArtistDto.name) ||
       !isBoolean(createArtistDto.grammy)
     ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const artist = this.artistService.create(createArtistDto);
+    const artist = await this.artistService.create(createArtistDto);
+
     res.status(HttpStatus.CREATED).json(artist).send();
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const artists = this.artistService.findAll();
+  async findAll(@Res() res: Response) {
+    const artists = await this.artistService.findAll();
+
     res.status(HttpStatus.OK).json(artists).send();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
+  async findOne(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const artist = this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
 
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
@@ -62,13 +79,18 @@ export class ArtistController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateArtistDto: UpdateArtistDto,
     @Res() res: Response,
   ) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
@@ -85,32 +107,49 @@ export class ArtistController {
       return;
     }
 
-    const artist = this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
 
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    const updatedArtist = this.artistService.update(id, updateArtistDto);
+    const updatedArtist = await this.artistService.update(id, updateArtistDto);
+
     res.status(HttpStatus.OK).json(updatedArtist).send();
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id') id: string, @Res() res: Response) {
     if (!isUUID(id)) {
-      res.status(HttpStatus.BAD_REQUEST).send();
+      const error = {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'Bad request',
+      };
+
+      res.status(HttpStatus.BAD_REQUEST).json(error).send();
       return;
     }
 
-    const artist = this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
 
     if (!artist) {
-      res.status(HttpStatus.NOT_FOUND).send();
+      const error = {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Not found',
+      };
+
+      res.status(HttpStatus.NOT_FOUND).json(error).send();
       return;
     }
 
-    this.artistService.remove(id);
+    await this.artistService.remove(id);
+
     res.status(HttpStatus.NO_CONTENT).send();
   }
 }

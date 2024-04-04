@@ -1,36 +1,133 @@
 import { Injectable } from '@nestjs/common';
-import { Track } from 'src/track/interfaces/track.interface';
-import { Album } from 'src/album/interfaces/album.interface';
-import { Artist } from 'src/artist/interfaces/artist.interface';
-import database from '../database';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class FavsService {
-  findAll() {
-    return database.getFavorites();
+  constructor(private prisma: PrismaService) {}
+
+  async findAll() {
+    const artistsData = await this.prisma.favorite.findMany({
+      select: {
+        artistId: true,
+      },
+      where: {
+        artistId: { not: null },
+      },
+    });
+
+    const artistIds = artistsData.map((artist) => artist.artistId);
+
+    const albumsData = await this.prisma.favorite.findMany({
+      select: {
+        albumId: true,
+      },
+      where: {
+        albumId: { not: null },
+      },
+    });
+
+    const albumIds = albumsData.map((album) => album.albumId);
+
+    const tracksData = await this.prisma.favorite.findMany({
+      select: {
+        trackId: true,
+      },
+      where: {
+        trackId: { not: null },
+      },
+    });
+
+    const trackIds = tracksData.map((track) => track.trackId);
+
+    const artists = await this.prisma.artist.findMany({
+      where: { id: { in: artistIds } },
+    });
+    const albums = await this.prisma.album.findMany({
+      where: { id: { in: albumIds } },
+    });
+    const tracks = await this.prisma.track.findMany({
+      where: { id: { in: trackIds } },
+    });
+
+    return {
+      artists,
+      albums,
+      tracks,
+    };
   }
 
-  addTrack(id: string): Track | undefined {
-    return database.addTrackToFavs(id);
+  async addTrack(id: string) {
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    const trackFav = await this.prisma.favorite.findUnique({
+      where: { trackId: id },
+    });
+
+    if (track && !trackFav) {
+      await this.prisma.favorite.create({ data: { trackId: id } });
+    }
+
+    return track;
   }
 
-  removeTrack(id: string): Track | undefined {
-    return database.removeTrackFromFavs(id);
+  async removeTrack(id: string) {
+    const track = await this.prisma.favorite.findUnique({
+      where: { trackId: id },
+    });
+
+    if (track) {
+      await this.prisma.favorite.delete({ where: { trackId: id } });
+    }
+
+    return track;
   }
 
-  addAlbum(id: string): Album | undefined {
-    return database.addAlbumToFavs(id);
+  async addAlbum(id: string) {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+    const albumFav = await this.prisma.favorite.findUnique({
+      where: { albumId: id },
+    });
+
+    if (album && !albumFav) {
+      await this.prisma.favorite.create({ data: { albumId: id } });
+    }
+
+    return album;
   }
 
-  removeAlbum(id: string): Album | undefined {
-    return database.removeAlbumFromFavs(id);
+  async removeAlbum(id: string) {
+    const album = await this.prisma.favorite.findUnique({
+      where: { albumId: id },
+    });
+
+    if (album) {
+      await this.prisma.favorite.delete({ where: { albumId: id } });
+    }
+
+    return album;
   }
 
-  addArtist(id: string): Artist | undefined {
-    return database.addArtistToFavs(id);
+  async addArtist(id: string) {
+    const artist = await this.prisma.artist.findUnique({ where: { id } });
+    const artistFav = await this.prisma.favorite.findUnique({
+      where: { artistId: id },
+    });
+
+    if (artist && !artistFav) {
+      await this.prisma.favorite.create({ data: { artistId: id } });
+    }
+
+    return artist;
   }
 
-  removeArtist(id: string): Artist | undefined {
-    return database.removeArtistFromFavs(id);
+  async removeArtist(id: string) {
+    const artist = await this.prisma.favorite.findUnique({
+      where: { artistId: id },
+    });
+
+    if (artist) {
+      await this.prisma.favorite.delete({ where: { artistId: id } });
+    }
+
+    return artist;
   }
 }
