@@ -1,29 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Album } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createAlbumDto: CreateAlbumDto) {
-    return this.prisma.album.create({ data: createAlbumDto });
+  async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
+    const album = await this.prisma.album.create({ data: createAlbumDto });
+    return new Album(album);
   }
 
-  async findAll() {
-    return this.prisma.album.findMany();
+  async findAll(): Promise<Album[]> {
+    const albums = await this.prisma.album.findMany();
+    return albums.map((album) => new Album(album));
   }
 
-  async findOne(id: string) {
-    return this.prisma.album.findUnique({ where: { id } });
+  async findOne(id: string): Promise<Album> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+
+    if (!album) {
+      throw new NotFoundException();
+    }
+
+    return new Album(album);
   }
 
-  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    return this.prisma.album.update({ where: { id }, data: updateAlbumDto });
+  async update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<Album> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+
+    if (!album) {
+      throw new NotFoundException();
+    }
+
+    const updatedAlbum = await this.prisma.album.update({
+      where: { id },
+      data: updateAlbumDto,
+    });
+
+    return new Album(updatedAlbum);
   }
 
-  async remove(id: string) {
-    return this.prisma.album.delete({ where: { id } });
+  async remove(id: string): Promise<void> {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+
+    if (!album) {
+      throw new NotFoundException();
+    }
+
+    await this.prisma.album.delete({ where: { id } });
   }
 }

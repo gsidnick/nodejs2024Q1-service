@@ -5,182 +5,79 @@ import {
   Param,
   Delete,
   HttpStatus,
-  Res,
+  ClassSerializerInterceptor,
+  UseInterceptors,
+  ParseUUIDPipe,
+  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { isUUID } from 'class-validator';
 import { FavsService } from './favs.service';
+import { Track } from 'src/track/entities/track.entity';
+import { Album } from 'src/album/entities/album.entity';
+import { Artist } from 'src/artist/entities/artist.entity';
+import { Favs } from './entities/favs.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('favs')
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async findAll(@Res() res: Response) {
-    const favorites = await this.favsService.findAll();
-
-    res.status(HttpStatus.OK).json(favorites).send();
+  async findAll(): Promise<Favs> {
+    return await this.favsService.findAll();
   }
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post('track/:id')
-  async addTrack(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.favsService.addTrack(id);
-
-    if (!track) {
-      const error = {
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message: 'Unprocessable entity',
-      };
-
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.CREATED).json(track).send();
+  async addTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Track> {
+    return await this.favsService.addTrack(id);
   }
 
+  @UseGuards(AuthGuard)
   @Delete('track/:id')
-  async removeTrack(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const track = await this.favsService.removeTrack(id);
-
-    if (!track) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.NO_CONTENT).send();
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.favsService.removeTrack(id);
   }
 
+  @UseGuards(AuthGuard)
   @Post('album/:id')
-  async addAlbum(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const album = await this.favsService.addAlbum(id);
-
-    if (!album) {
-      const error = {
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message: 'Unprocessable entity',
-      };
-
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.CREATED).json(album).send();
+  async addAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Album> {
+    return await this.favsService.addAlbum(id);
   }
 
+  @UseGuards(AuthGuard)
   @Delete('album/:id')
-  async removeAlbum(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const album = await this.favsService.removeAlbum(id);
-
-    if (!album) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.NO_CONTENT).send();
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.favsService.removeAlbum(id);
   }
 
+  @UseGuards(AuthGuard)
   @Post('artist/:id')
-  async addArtist(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const artist = await this.favsService.addArtist(id);
-
-    if (!artist) {
-      const error = {
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message: 'Unprocessable entity',
-      };
-
-      res.status(HttpStatus.UNPROCESSABLE_ENTITY).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.CREATED).json(artist).send();
+  async addArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Artist> {
+    return await this.favsService.addArtist(id);
   }
 
+  @UseGuards(AuthGuard)
   @Delete('artist/:id')
-  async removeArtist(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const artist = await this.favsService.removeArtist(id);
-
-    if (!artist) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.NO_CONTENT).send();
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.favsService.removeArtist(id);
   }
 }

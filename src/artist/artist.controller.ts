@@ -7,149 +7,61 @@ import {
   Param,
   Delete,
   HttpStatus,
-  Res,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  ParseUUIDPipe,
+  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { isBoolean, isString, isUUID } from 'class-validator';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { Artist } from './entities/artist.entity';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('artist')
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  async create(@Body() createArtistDto: CreateArtistDto, @Res() res: Response) {
-    if (
-      !(
-        Object.keys(createArtistDto).length === 2 &&
-        'name' in createArtistDto &&
-        'grammy' in createArtistDto
-      ) ||
-      !isString(createArtistDto.name) ||
-      !isBoolean(createArtistDto.grammy)
-    ) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const artist = await this.artistService.create(createArtistDto);
-
-    res.status(HttpStatus.CREATED).json(artist).send();
+  async create(@Body() createArtistDto: CreateArtistDto): Promise<Artist> {
+    return await this.artistService.create(createArtistDto);
   }
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async findAll(@Res() res: Response) {
-    const artists = await this.artistService.findAll();
-
-    res.status(HttpStatus.OK).json(artists).send();
+  async findAll(): Promise<Artist[]> {
+    return await this.artistService.findAll();
   }
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const artist = await this.artistService.findOne(id);
-
-    if (!artist) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    res.status(HttpStatus.OK).json(artist).send();
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Artist> {
+    return await this.artistService.findOne(id);
   }
 
+  @UseGuards(AuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-    @Res() res: Response,
-  ) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    if (
-      !(
-        Object.keys(updateArtistDto).length === 2 &&
-        'name' in updateArtistDto &&
-        'grammy' in updateArtistDto
-      ) ||
-      !isString(updateArtistDto.name) ||
-      !isBoolean(updateArtistDto.grammy)
-    ) {
-      res.status(HttpStatus.BAD_REQUEST).send();
-      return;
-    }
-
-    const artist = await this.artistService.findOne(id);
-
-    if (!artist) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
-    const updatedArtist = await this.artistService.update(id, updateArtistDto);
-
-    res.status(HttpStatus.OK).json(updatedArtist).send();
+  ): Promise<Artist> {
+    return await this.artistService.update(id, updateArtistDto);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id)) {
-      const error = {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Bad request',
-      };
-
-      res.status(HttpStatus.BAD_REQUEST).json(error).send();
-      return;
-    }
-
-    const artist = await this.artistService.findOne(id);
-
-    if (!artist) {
-      const error = {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Not found',
-      };
-
-      res.status(HttpStatus.NOT_FOUND).json(error).send();
-      return;
-    }
-
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
     await this.artistService.remove(id);
-
-    res.status(HttpStatus.NO_CONTENT).send();
   }
 }
